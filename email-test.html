@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        h1 {
+            color: #4a9eff;
+        }
+
+        .email {
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .email:hover {
+            background: #1f2f4f;
+        }
+
+        .email-from {
+            font-weight: bold;
+            color: #4a9eff;
+        }
+
+        .email-subject {
+            font-size: 1.1em;
+            margin: 5px 0;
+        }
+
+        .email-date {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .unread {
+            border-left: 4px solid #4a9eff;
+        }
+
+        button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background: #357abd;
+        }
+
+        #loading {
+            text-align: center;
+            color: #4a9eff;
+        }
+
+        #error {
+            color: #ff4444;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>📧 Email Inbox Test</h1>
+    <button onclick="loadEmails()">🔄 Refresh</button>
+    <div id="loading" style="display:none;">Loading emails...</div>
+    <div id="error"></div>
+    <div id="emails"></div>
+
+    <script>
+        async function loadEmails() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const emailsDiv = document.getElementById('emails');
+
+            loading.style.display = 'block';
+            error.textContent = '';
+            emailsDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('http://localhost:4001/api/emails/inbox-test');
+                const data = await response.json();
+
+                loading.style.display = 'none';
+
+                if (data.emails && data.emails.length > 0) {
+                    data.emails.forEach(email => {
+                        const div = document.createElement('div');
+                        div.className = 'email' + (email.read ? '' : ' unread');
+                        div.innerHTML = `
+                            <div class="email-from">From: ${email.from}</div>
+                            <div class="email-subject">Subject: ${email.subject}</div>
+                            <div class="email-date">Date: ${new Date(email.date).toLocaleString()}</div>
+                        `;
+                        emailsDiv.appendChild(div);
+                    });
+                } else {
+                    emailsDiv.innerHTML = '<p>No emails found</p>';
+                }
+            } catch (err) {
+                loading.style.display = 'none';
+                error.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        // Load on page load
+        loadEmails();
+    </script>
+</body>
+
+</html>
